@@ -300,7 +300,7 @@ async def unmute_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await message.reply_text(f"Failed to unmute {username}. Make sure I have admin rights.")
 
 
-def main() -> None:
+async def main() -> None:
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     if not token:
         raise ValueError("TELEGRAM_BOT_TOKEN environment variable is not set.")
@@ -317,11 +317,16 @@ def main() -> None:
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CommandHandler("warnings", warn_count_command))
     app.add_handler(CommandHandler("resetwarnings", reset_warnings_command))
-    app.add_handler(CommandHandler("unmute", unmute_command))
-
-    logger.info("Bot is starting...")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
-
+    app.add_handler(CommandHandler("unmute", unmute_command)
+                        await app.run_polling(allowed_updates=Update.ALL_TYPES)
+    
+import asyncio
 
 if __name__ == "__main__":
-    main()
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    loop.run_until_complete(main)
+    
